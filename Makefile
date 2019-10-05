@@ -1,13 +1,17 @@
 CC = gcc       # compiler
-CFLAGS = -Wall -g -std=c99 # compilation flg 
+CFLAGS = -Wall -std=c99 # compilation flg 
 LD = gcc       # linker
 
-TARGETS= convo 
+TARGETS = convo 
 
 all: ${TARGETS}
 
-findpng: convo.o 
-	$(LD) -o $@ $^ $(LDFLAGS) 
+debug: CFLAGS += -DDEBUG -g
+debug: ${TARGETS}
+
+
+convo: convo.o 
+	$(LD) -o $@ $^
 
 %.o: %.c 
 	$(CC) $(CFLAGS) -c $< 
