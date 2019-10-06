@@ -13,9 +13,12 @@
 #define K_WIDTH 1
 #define K_DEF {-1, 0 , 1}
 
-void print_uchar_matrix(int rows, int cols, unsigned char mat[rows][cols]);
-void print_short_matrix(int rows, int cols, short mat[rows][cols]);
-void convolve_K(int rows, int cols, unsigned char source[rows][cols], short out[rows][cols], char dirn);
+void print_uchar_matrix(unsigned char ** mat, int rows, int cols);
+void print_short_matrix(short ** mat, int rows, int cols);
+unsigned char ** alloc_2d_uchar_arr(int rows, int cols);
+short ** alloc_2d_short_arr(int rows, int cols);
+void calc_min_max(int * min, int * max, short ** mat, int rows, int cols);
+void convolve_K(short ** out, unsigned char ** source, int rows, int cols, char dirn);
 
 const int K[K_LEN] = K_DEF;
 
@@ -30,10 +33,15 @@ int main(int argc, char ** argv)
     int rows = atoi(argv[1]);
     int cols = atoi(argv[2]);
 
+    if (rows <= 0 || cols <= 0){
+        fprintf(stderr, "Row and Column inputs must be positive integers");
+        exit(1);
+    }
+
     // CREATE & POPULATE M ////////////////////////////////////////////////////////
-    unsigned char M[rows][cols];
-    short Dx[rows][cols];
-    short Dy[rows][cols];
+    unsigned char **M = alloc_2d_uchar_arr(rows, cols);
+    short ** Dx = alloc_2d_short_arr(rows, cols);
+    short ** Dy = alloc_2d_short_arr(rows, cols);
 
     srand((unsigned int) time(0));
 
@@ -54,8 +62,8 @@ int main(int argc, char ** argv)
     times[0] = (tv.tv_sec) + tv.tv_usec/1000000.;
 
     // COMPUTE ////////////////////////////////////////////////////////////////////
-    convolve_K(rows, cols, M, Dx, 'H');
-    convolve_K(rows, cols, M, Dy, 'V');
+    convolve_K(Dx, M, rows, cols, 'H'); // apply filter horizontally to rows
+    convolve_K(Dy, M, rows, cols, 'V'); // apply vertically to cols
 
     // END TIMER //////////////////////////////////////////////////////////////////
     if (gettimeofday(&tv, NULL) != 0) {
@@ -65,22 +73,29 @@ int main(int argc, char ** argv)
     times[1] = (tv.tv_sec) + tv.tv_usec/1000000.;
     printf("computing Dx and Dy execution time: %.10lf seconds\n",  times[1] - times[0]);
 
+    // FIND MIN/MAX ////////////////////////////////////////////////////////////////////
+    int min, max;
+    calc_min_max(&min, &max, Dx, rows, cols);
+    printf("Dx min: %d, max: %d\n",  min, max);
+    calc_min_max(&min, &max, Dy, rows, cols);
+    printf("Dy min: %d, max: %d\n",  min, max);
+
     // DBG STATEMENTS ////////////////////////////////////////////////////////////
     #ifdef DEBUG
         printf("M\n");
-        print_uchar_matrix( rows, cols, M );
+        print_uchar_matrix( M, rows, cols );
 
         printf("Dx\n");
-        print_short_matrix( rows, cols, Dx );
+        print_short_matrix( Dx, rows, cols );
 
         printf("Dy\n");
-        print_short_matrix( rows, cols, Dy );
+        print_short_matrix( Dy, rows, cols );
     #endif
 
     return 0;
 }
 
-void convolve_K(int rows, int cols, unsigned char source[rows][cols], short out[rows][cols], char dirn){
+void convolve_K(short ** out, unsigned char ** source, int rows, int cols, char dirn){
     int sum;
     int mod_ind;
     int mod;
@@ -121,7 +136,23 @@ void convolve_K(int rows, int cols, unsigned char source[rows][cols], short out[
 
 }
 
-void print_uchar_matrix(int rows, int cols, unsigned char mat[rows][cols]){
+void calc_min_max(int * min, int * max, short ** mat, int rows, int cols){
+    *min = mat[0][0];
+    *max = mat[0][0];
+
+    for (int i = 0; i < rows; i++){
+        for (int j = 0; j < cols; j++){
+            if (mat[i][j] > *max){
+                *max = mat[i][j];
+            }
+            if (mat[i][j] < *min){
+                *min = mat[i][j];
+            }
+        }
+    }
+}
+
+void print_uchar_matrix(unsigned char ** mat, int rows, int cols){
     for (int i = 0; i < rows; i++){
         for (int j = 0; j < cols; j++){
             printf("%d\t", mat[i][j]);
@@ -130,11 +161,28 @@ void print_uchar_matrix(int rows, int cols, unsigned char mat[rows][cols]){
     }
 }
 
-void print_short_matrix(int rows, int cols, short mat[rows][cols]){
+void print_short_matrix(short ** mat, int rows, int cols){
     for (int i = 0; i < rows; i++){
         for (int j = 0; j < cols; j++){
             printf("%d\t", mat[i][j]);
         }
         printf("\n");
     }
+}
+
+unsigned char ** alloc_2d_uchar_arr(int rows, int cols){
+    unsigned char ** arr = malloc( sizeof(unsigned char *) * rows);
+    for (int i = 0; i < rows; i++){
+        arr[i] = malloc( sizeof(unsigned char) * cols);
+    }
+    return arr;
+}
+
+
+short ** alloc_2d_short_arr(int rows, int cols){
+    short ** arr = malloc( sizeof(short *) * rows);
+    for (int i = 0; i < rows; i++){
+        arr[i] = malloc( sizeof(short) * cols);
+    }
+    return arr;
 }
