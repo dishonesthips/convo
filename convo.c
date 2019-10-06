@@ -1,5 +1,5 @@
 /**
- * @brief: convolves a matrix of a given size with a cosntant filter 
+ * @brief: convolves a matrix of a given size with a cosntant filter in 2 directions
  * To execute: ./<executable> <rows> <columns>
  * EXAMPLE: ./convo 10 10
  */
