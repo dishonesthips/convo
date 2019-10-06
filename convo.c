@@ -72,16 +72,16 @@ int main(int argc, char ** argv)
         abort();
     }
     times[1] = (tv.tv_sec) + tv.tv_usec/1000000.;
-    printf("computing Dx and Dy execution time: %.10lf seconds\n",  times[1] - times[0]);
+    printf("computing Dx and Dy execution time: %.10f seconds\n",  times[1] - times[0]);
 
-    // FIND MIN/MAX ////////////////////////////////////////////////////////////////////
+    // FIND MIN/MAX ///////////////////////////////////////////////////////////////
     int min, max;
     calc_min_max(&min, &max, Dx, rows, cols);
     printf("Dx min: %d, max: %d\n",  min, max);
     calc_min_max(&min, &max, Dy, rows, cols);
     printf("Dy min: %d, max: %d\n",  min, max);
 
-    // DBG STATEMENTS ////////////////////////////////////////////////////////////
+    // DBG STATEMENTS /////////////////////////////////////////////////////////////
     #ifdef DEBUG
         printf("M\n");
         print_uchar_matrix( M, rows, cols );
