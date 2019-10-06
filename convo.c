@@ -22,7 +22,6 @@ const int K[K_LEN] = K_DEF;
 int main(int argc, char ** argv) 
 {
     // INPUT CHECKING /////////////////////////////////////////////////////////////
-
     if (argc != 3){
         fprintf(stderr, "Usage: %s <pos int rows> <pos int cols>\n", argv[0]);
         exit(1);
@@ -33,19 +32,16 @@ int main(int argc, char ** argv)
 
     // CREATE & POPULATE M ////////////////////////////////////////////////////////
     unsigned char M[rows][cols];
+    short Dx[rows][cols];
+    short Dy[rows][cols];
 
     srand((unsigned int) time(0));
 
     for (int i = 0; i < rows; i++){
         for (int j = 0; j < cols; j++){
-            // unsigned char t= rand();
-            // printf("%d\n", t);
             M[i][j] = rand();
         }
     }
-
-    printf("M\n");
-    print_uchar_matrix( rows, cols, M );
 
     // INIT TIMER /////////////////////////////////////////////////////////////////
     double times[2];
@@ -57,21 +53,31 @@ int main(int argc, char ** argv)
     }
     times[0] = (tv.tv_sec) + tv.tv_usec/1000000.;
 
-    // COMPUTE DX /////////////////////////////////////////////////////////////////
-
-    short Dx[rows][cols];
+    // COMPUTE ////////////////////////////////////////////////////////////////////
     convolve_K(rows, cols, M, Dx, 'H');
-    printf("Dx\n");
-    print_short_matrix( rows, cols, Dx );
-
-
-    // COMPUTE DY /////////////////////////////////////////////////////////////////
-    short Dy[rows][cols];
     convolve_K(rows, cols, M, Dy, 'V');
-    printf("Dy\n");
-    print_short_matrix( rows, cols, Dy );
+
+    // END TIMER //////////////////////////////////////////////////////////////////
+    if (gettimeofday(&tv, NULL) != 0) {
+        perror("gettimeofday");
+        abort();
+    }
+    times[1] = (tv.tv_sec) + tv.tv_usec/1000000.;
+    printf("computing Dx and Dy execution time: %.10lf seconds\n",  times[1] - times[0]);
+
+    // DBG STATEMENTS ////////////////////////////////////////////////////////////
+    #ifdef DEBUG
+        printf("M\n");
+        print_uchar_matrix( rows, cols, M );
+
+        printf("Dx\n");
+        print_short_matrix( rows, cols, Dx );
+
+        printf("Dy\n");
+        print_short_matrix( rows, cols, Dy );
+    #endif
+
     return 0;
-    
 }
 
 void convolve_K(int rows, int cols, unsigned char source[rows][cols], short out[rows][cols], char dirn){
@@ -98,12 +104,18 @@ void convolve_K(int rows, int cols, unsigned char source[rows][cols], short out[
                 if (pick >= bound) pick = bound-1;
 
                 mod = (dirn == 'H') ? source[i][pick] : source[pick][j] ;
-                                
-                // printf("%d + ", mod * K[k + K_WIDTH]);
+
                 sum += mod * K[k + K_WIDTH];
+
+                // #ifdef DEBUG1
+                //     printf("%d + ", mod * K[k + K_WIDTH]);
+                // #endif
             }
-            // printf(" = %d\n", sum);
             out[i][j] = sum;
+
+            // #ifdef DEBUG1
+            //     printf(" = %d\n", sum);
+            // #endif
         }
     }
 
