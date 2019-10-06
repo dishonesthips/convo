@@ -3,6 +3,9 @@ A little c script that randomly generates a character matrix and applies a const
 
 It outputs the combined execution time for the filtering as well as the min/max values of both the output matrices.
 
+### assumptions
+When the filter tries to access values in the matrix that are out of bounds, the index it looks at gets set to the nearest in-bound border index.
+
 # usage
 ```
 $ make 
