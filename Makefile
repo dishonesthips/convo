@@ -1,5 +1,5 @@
 CC = gcc       # compiler
-CFLAGS = -Wall -std=c99 # compilation flg 
+CFLAGS = -Wall -std=c11 # compilation flg 
 LD = gcc       # linker
 
 TARGETS = convo 

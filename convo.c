@@ -8,6 +8,7 @@
 #include <stdio.h>  
 #include <stdlib.h>
 #include <sys/time.h>
+#include <time.h>
 
 #define K_LEN 3
 #define K_WIDTH 1
